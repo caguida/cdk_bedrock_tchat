@@ -13,3 +13,4 @@ def get_parameter(name):
     value = response["Parameter"]["Value"]
     
     return value
+

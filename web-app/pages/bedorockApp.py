@@ -15,21 +15,21 @@ AI_ICON = "./img/reply-logo.png"
 base_url = get_parameter(txt_apigw_endpoint_chat)
 headers = {'Content-Type': 'application/json'}
 
-st.set_page_config(page_title="AWSomeChat - An LLM-powered chatbot on AWS documentation")
+st.set_page_config(page_title="BedrockChat - An LLM-powered chatbot on AWS documentation")
 
 # Sidebar contents
 with st.sidebar:
-    st.title('🤗💬 AWSomeChat App')
+    st.title('🤗💬 BedrockChat App')
     st.markdown('''
     ## About
     This app is an LLM-powered chatbot built using:
     - [Streamlit](https://streamlit.io/)
-    - [Amazon SageMaker](https://aws.amazon.com/sagemaker/) 
+    - [Amazon bedrock](https://us-west-2.console.aws.amazon.com/bedrock/) 
     - [Amazon Kendra](https://aws.amazon.com/kendra/)
     
     ''')
     add_vertical_space(5)
-    st.write('Made with ❤️ by your AWS WWSO AIML EMEA Team')
+    st.write('Made with ❤️ by Reply')
 
 st.markdown("""
         <style>
@@ -68,13 +68,13 @@ session_id = get_session()
 def refresh():
     session_id = create_session_id()
     st.session_state.session_id = session_id
-    st.session_state['generated'] = ["Hi, I'm AWSomeChat. I have lots of information on AWS documentation. How may I help you?"]
+    st.session_state['generated'] = ["Hi, I'm BedrockChat. I have lots of information on AWS documentation. How may I help you?"]
     st.session_state['past'] = []
 
 
 def clear():
     st.session_state.session_id = session_id
-    st.session_state['generated'] = ["Hi, I'm AWSomeChat. I have lots of information on AWS documentation. How may I help you?"]
+    st.session_state['generated'] = ["Hi, I'm BedrockChat. I have lots of information on AWS documentation. How may I help you?"]
     st.session_state['past'] = []
     st.session_state['input'] = ""
 
@@ -90,7 +90,7 @@ def write_top_bar():
     with col1:
         st.image(AI_ICON, use_column_width='always')
     with col2:
-        st.write(f"<h4 class='main-header'>AWSomeChat</h4>",  unsafe_allow_html=True)
+        st.write(f"<h4 class='main-header'>BedrockChat</h4>",  unsafe_allow_html=True)
     with col3:
         if st.button("Clear Chat", key="clear"):
             clear()
@@ -124,7 +124,7 @@ with input_container:
 # Generate empty lists for generated and past.
 # generated stores AI generated responses
 if 'generated' not in st.session_state:
-    st.session_state['generated'] = ["Hi, I'm AWSomeChat. I have lots of information on AWS documentation. How may I help you?"]
+    st.session_state['generated'] = ["Hi, I'm BedrockChat. I have lots of information on AWS documentation. How may I help you?"]
 ## past stores User's questions
 if 'past' not in st.session_state:
     st.session_state['past'] = []

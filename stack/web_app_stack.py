@@ -20,7 +20,7 @@ class WepAppStack(Stack):
         cluster.add_capacity("AsgSpot",
             max_capacity=2,
             min_capacity=1,
-            desired_capacity=2,
+            desired_capacity= 2,
             instance_type=ec2.InstanceType("c5.xlarge"),
             spot_price="0.0735",
             # Enable the Automated Spot Draining support for Amazon ECS
@@ -58,7 +58,6 @@ class WepAppStack(Stack):
             resources = ["*"],
             )
         )          
-
 
         # Setup task auto-scaling
         scaling = fargate_service.service.auto_scale_task_count(
