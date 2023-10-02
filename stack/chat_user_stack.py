@@ -20,6 +20,25 @@ class ChatUserStack(Stack):
 
 
         # Crée la fonction Lambda
+        lambda_handler_path_entry = os.path.join(os.getcwd(), "lambda")
+        lambda_function_entry = Function(self, "LambdaFunctionEntry",
+            runtime=Runtime.PYTHON_3_8,
+            handler="lambda_entry.handler",
+            timeout=Duration.seconds(180),
+            code=Code.from_asset(lambda_handler_path_entry),
+        )
+
+        # add policy for invoking
+        lambda_function_entry.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=[
+                    "lambda:InvokeFunction",
+                ],
+                resources=["*"]
+            )
+        )
+
+        # Crée la fonction Lambda
         
         lambda_handler_path = os.path.join(os.getcwd(), "lambda_chat_dock")
         lambda_function = _lambda.DockerImageFunction(
@@ -101,7 +120,7 @@ class ChatUserStack(Stack):
         # Defines an Amazon API Gateway endpoint 
         apigw_endpoint_chat = apigw.LambdaRestApi(
             self, "apigw_endpoint_chat",
-            handler=lambda_function
+            handler=lambda_function_entry
         )  
 
     #    DynamoDB Table

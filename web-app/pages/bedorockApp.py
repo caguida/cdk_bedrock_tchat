@@ -9,7 +9,7 @@ import os
 import requests
 import uuid
 from configs import *
-
+import time
 
 AI_ICON = "./img/reply-logo.png"
 base_url = get_parameter(txt_apigw_endpoint_chat)
@@ -132,18 +132,51 @@ if 'past' not in st.session_state:
 
 # Response output
 ## Function for taking user prompt as input followed by producing AI generated responses
-def generate_response(prompt):
+
+def getDBstate():
+   count = 0
+   responsedb = dynamodb.get_item(
+        TableName='MemoryTableChat',
+        Key={
+            'SessionId': {'S': session_id}
+        })
+   
+   if 'Item' in responsedb:
+      res = responsedb['Item']
+      count =  len(res["History"]["L"])
+   return(count)
+   
+def generate_response(prompt,previous_count):
     url = f'{base_url}'
     body = {"query": prompt, "uuid": session_id}
     response = requests.post(url, headers=headers, data=json.dumps(body), verify=False)
-    output_text = response.text
+    
+    current_count = 0
+    while previous_count >= current_count:
+        responsedb = dynamodb.get_item(
+        TableName='MemoryTableChat',
+        Key={
+            'SessionId': {'S': session_id}
+        }
+        )
+
+        if 'Item' in responsedb:
+            res = responsedb['Item']
+            current_count = len(res["History"]["L"])
+        time.sleep(5)
+    answer = res["History"]["L"][current_count - 1]
+
+    output_text = answer["M"]["data"]["M"]["content"]["S"]
     return output_text
+
+dynamodb = boto3.client('dynamodb', region_name='us-east-1')
 
 
 ## Conditional display of AI generated responses as a function of user provided prompts
 with response_container:
     if user_input:
-        response = generate_response(user_input)
+        previous_count = getDBstate()
+        response = generate_response(user_input, previous_count)
         st.session_state.past.append(user_input)
         st.session_state.generated.append(response)
         

@@ -53,12 +53,12 @@ kendra_client = boto3.client("kendra", REGION,
                                  aws_session_token= aws_session_token)
 
 llm = Bedrock(client = bedrock_client, 
-            model_kwargs={"max_tokens_to_sample":300,"temperature":1,"top_k":250,"top_p":0.999,"anthropic_version":"bedrock-2023-05-31"},
+            model_kwargs={"max_tokens_to_sample":1000,"temperature":1,"top_k":250,"top_p":0.999,"anthropic_version":"bedrock-2023-05-31"},
             model_id = "anthropic.claude-v2")
 
 
 _template =   """Human: This is a friendly conversation between a human and an AI. 
-  The AI is talkative and provides specific details from its context but limits it to 1000 tokens.
+  The AI is talkative and provides specific details from its context.
   If the AI does not know the answer to a question, it truthfully says it 
   does not know. Always answer in French. Provide very detailed answers and more detail on the documents concerned.
 
@@ -88,8 +88,8 @@ Chat History:
 {chat_history}
 Follow Up Input: {question}
 Standalone question: 
+"""
 
-Assistant:"""
 standalone_question_prompt = PromptTemplate.from_template(condense_qa_template)
 
 def run_chain(chain, prompt: str):
@@ -97,13 +97,16 @@ def run_chain(chain, prompt: str):
 
 
 def lambda_handler(event, context):
-    body = json.loads(event['body'])
+    # body = event
+    # body = json.dumps(event)
+    body = event['body']
+    body = json.loads(body)
     query = body['query']
     uuid = body['uuid']
 
     message_history = DynamoDBChatMessageHistory(table_name="MemoryTableChat", session_id=uuid)
     # memory = ConversationBufferWindowMemory(memory_key="chat_history", chat_memory=message_history, return_messages=True, k=3)
-    memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True, output_key='answer') # if return_source_documents=True
+    memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True,ai_prefix="Assistant", output_key='answer',chat_memory=message_history) # if return_source_documents=True
 
     retriever = AmazonKendraRetriever(index_id=KENDRA_INDEX_ID, top_k=5, client=kendra_client)
 
@@ -111,7 +114,7 @@ def lambda_handler(event, context):
             llm=llm, 
             retriever=retriever,
             memory=memory,  
-            condense_question_prompt=standalone_question_prompt, 
+            # condense_question_prompt=standalone_question_prompt, 
             return_source_documents=True, 
             combine_docs_chain_kwargs={"prompt":PROMPT},
             verbose=True)

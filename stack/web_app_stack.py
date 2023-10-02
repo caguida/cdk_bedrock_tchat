@@ -54,10 +54,17 @@ class WepAppStack(Stack):
         
         fargate_service.task_definition.add_to_task_role_policy(iam.PolicyStatement(
             effect=iam.Effect.ALLOW,
-            actions = ["execute-api:Invoke","execute-api:ManageConnections"],
+            actions = ["execute-api:Invoke","execute-api:ManageConnections",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem"
+                       ],
             resources = ["*"],
             )
-        )          
+        ) 
 
         # Setup task auto-scaling
         scaling = fargate_service.service.auto_scale_task_count(
